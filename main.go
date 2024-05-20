@@ -6,7 +6,6 @@ import (
 
 	"github.com/gabrielseibel1/godo/commands"
 	"github.com/gabrielseibel1/godo/data"
-	"github.com/gabrielseibel1/godo/types"
 )
 
 func main() {
@@ -26,15 +25,7 @@ func main() {
 	}
 
 	// prepare persistency layer
-	repo := data.LoggerOverRepository(
-		data.MockWithData(map[types.ID]types.Actionable{
-			types.ID("a1"): types.NewActivity(
-				types.ID("a1"), "details of a1",
-			),
-			types.ID("a42"): types.NewActivity(
-				types.ID("a42"), "the answer to all",
-			),
-		}))
+	repo := data.LoggerOverRepository(data.FileJSONRepository())
 
 	// parse command
 	parse := commands.ParserWithRepository(repo)

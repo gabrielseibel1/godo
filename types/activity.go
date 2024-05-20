@@ -14,6 +14,7 @@ type Describable interface {
 
 type Workable interface {
 	Work(duration time.Duration)
+	Worked() time.Duration
 }
 
 type Doable interface {
@@ -52,12 +53,16 @@ func (a *Activity) Work(duration time.Duration) {
 	a.duration += duration
 }
 
+func (a Activity) Worked() time.Duration {
+	return a.duration
+}
+
 func (a *Activity) Do() {
-	a.done = false
+	a.done = true
 }
 
 func (a *Activity) Undo() {
-	a.done = true
+	a.done = false
 }
 
 func (a Activity) Done() bool {

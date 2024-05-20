@@ -23,10 +23,24 @@ func (w Work) String() string {
 
 // Execute implements Command.
 func (w Work) Execute() error {
-	panic("unimplemented")
+	a, err := w.repo.Get(w.id)
+	if err != nil {
+		return err
+	}
+	a.Work(w.duration)
+	return w.repo.Put(a)
 }
 
 // Parameterize implements Command.
-func (w Work) Parameterize([]string) error {
-	panic("unimplemented")
+func (w *Work) Parameterize(args []string) error {
+	if len(args) != 2 {
+		return errArgsCount(2, len(args))
+	}
+	w.id = types.ID(args[0])
+	duration, err := time.ParseDuration(args[1])
+	if err != nil {
+		return err
+	}
+	w.duration = duration
+	return nil
 }

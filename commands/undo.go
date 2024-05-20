@@ -21,10 +21,19 @@ func (u Undo) String() string {
 
 // Execute implements Command.
 func (u Undo) Execute() error {
-	panic("unimplemented")
+	a, err := u.repo.Get(u.id)
+	if err != nil {
+		return err
+	}
+	a.Undo()
+	return u.repo.Put(a)
 }
 
 // Parameterize implements Command.
-func (u Undo) Parameterize([]string) error {
-	panic("unimplemented")
+func (u *Undo) Parameterize(args []string) error {
+	if len(args) != 1 {
+		return errArgsCount(1, len(args))
+	}
+	u.id = types.ID(args[0])
+	return nil
 }

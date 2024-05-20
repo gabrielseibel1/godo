@@ -14,6 +14,11 @@ func MockWithData(data map[types.ID]types.Actionable) Repository {
 	return Mock{data: data}
 }
 
+// Initialize implements Repository.
+func (m Mock) Initialize() error {
+	return nil
+}
+
 // Get implements Repository.
 func (m Mock) Get(id types.ID) (types.Actionable, error) {
 	a, ok := m.data[id]

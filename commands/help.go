@@ -30,8 +30,8 @@ func (h *Help) Execute() error {
 			string(DoCommandName),
 			string(UndoCommandName),
 			string(WorkCommandName),
+			string(HelpCommandName),
 		}, "|"))
-	fmt.Println("\t[args] = {help|...}")
 	return nil
 }
 

@@ -21,10 +21,19 @@ func (d Do) String() string {
 
 // Execute implements Command.
 func (d Do) Execute() error {
-	panic("unimplemented")
+	a, err := d.repo.Get(d.id)
+	if err != nil {
+		return err
+	}
+	a.Do()
+	return d.repo.Put(a)
 }
 
 // Parameterize implements Command.
-func (d Do) Parameterize([]string) error {
-	panic("unimplemented")
+func (d *Do) Parameterize(args []string) error {
+	if len(args) != 1 {
+		return errArgsCount(1, len(args))
+	}
+	d.id = types.ID(args[0])
+	return nil
 }

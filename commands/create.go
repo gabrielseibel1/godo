@@ -21,10 +21,21 @@ func (c Create) String() string {
 
 // Execute implements Command.
 func (c Create) Execute() error {
-	panic("unimplemented")
+	return c.repo.Put(c.actionable)
 }
 
 // Parameterize implements Command.
-func (c Create) Parameterize([]string) error {
-	panic("unimplemented")
+func (c *Create) Parameterize(args []string) error {
+	if len(args) != 2 {
+		return errArgsCount(2, len(args))
+	}
+	id, description := types.ID(args[0]), args[1]
+	if id == "" {
+		return fmt.Errorf("no id")
+	}
+	if description == "" {
+		return fmt.Errorf("no description")
+	}
+	c.actionable = types.NewActivity(id, description)
+	return nil
 }
