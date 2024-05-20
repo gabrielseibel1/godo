@@ -71,7 +71,7 @@ func main() {
 		}
 		return item{
 			title: string(actionable.Identify()),
-			desc: fmt.Sprintf("%s %s - %s",
+			desc: fmt.Sprintf("%s (%s) %s",
 				checkbox, actionable.Worked().String(), actionable.Describe()),
 		}
 	})
