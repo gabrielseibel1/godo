@@ -14,7 +14,7 @@ go install github.com/gabrielseibel1/godo@latest
 
 ## Usage
 
-To run the application have Go installed and then:
+To run the application have it installed and then:
 
 ```sh
 godo help
@@ -44,3 +44,13 @@ godo do id1
 # ...time goes on and you don't want to keep the item anymore
 godo delete id1
 ```
+
+## Dashboard
+
+```sh
+godo
+```
+
+![usage](godo.gif)
+
+Use the dashboard to monitor the todo list edits from other terminal windows, as the GIF shows below.

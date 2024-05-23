@@ -9,25 +9,16 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 1 {
-		panic("no program name")
-	}
-	name := os.Args[0]
+	// prepare persistency layer
+	repo := data.FileJSONRepository()
+
+	// if no extra arguments passed, show UI
 	if len(os.Args) < 2 {
-		help := &commands.Help{}
-		if err := help.Parameterize([]string{name}); err != nil {
-			panic(err)
-		}
-		if err := help.Execute(); err != nil {
-			panic(err)
-		}
+		uiList(repo)
 		return
 	}
 
-	// prepare persistency layer
-	repo := data.LoggerOverRepository(data.FileJSONRepository())
-
-	// parse command
+	// parse command from arguments
 	parse := commands.ParserWithRepository(repo)
 	command, err := parse(os.Args)
 	if err != nil {
@@ -35,7 +26,7 @@ func main() {
 	}
 
 	// run command
-	execute := commands.ExecutorWithLog()
+	execute := commands.ExecutorWithoutLogs()
 	if err := execute(command); err != nil {
 		if err == data.ErrNotFound {
 			slog.Error("error", err)

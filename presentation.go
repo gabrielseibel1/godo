@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"slices"
 	"strings"
 	"time"
@@ -82,9 +81,7 @@ func actionableToItem(actionable types.Actionable) list.Item {
 	}
 }
 
-func main() {
-	repo := data.FileJSONRepository()
-
+func uiList(repo data.Repository) {
 	items := make([]list.Item, 0, 1000)
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "GoDo - ToDo List"
@@ -146,7 +143,6 @@ func main() {
 	}(valuesChannel, updateChannel)
 
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		panic(err)
 	}
 }

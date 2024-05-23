@@ -14,3 +14,9 @@ func ExecutorWithLog() Executor {
 		return nil
 	}
 }
+
+func ExecutorWithoutLogs() Executor {
+	return func(c Command) error {
+		return c.Execute()
+	}
+}
