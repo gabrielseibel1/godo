@@ -4,12 +4,16 @@ import (
 	"fmt"
 
 	"github.com/gabrielseibel1/godo/data"
+	"github.com/gabrielseibel1/godo/types"
 )
+
+type Displayer func(types.Actionable) string
 
 const ListCommandName CommandName = "list"
 
 type List struct {
-	repo data.Repository
+	repo    data.Repository
+	display Displayer
 }
 
 // String implements Command.
@@ -24,7 +28,7 @@ func (l List) Execute() error {
 		return err
 	}
 	for _, a := range as {
-		fmt.Println(a)
+		fmt.Println(l.display(a))
 	}
 	return nil
 }

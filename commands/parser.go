@@ -9,13 +9,13 @@ import (
 
 type Parser func([]string) (Command, error)
 
-func ParserWithRepository(repo data.Repository) Parser {
+func NewParser(repo data.Repository, displayer Displayer) Parser {
 	return func(tokens []string) (Command, error) {
 		if len(tokens) < 2 {
 			return nil, types.ErrUnparsable(strings.Join(tokens, " "))
 		}
 		// find the corresponding command of the first token
-		cmd, err := tokenToCommandWithRepository(tokens[1], repo)
+		cmd, err := tokenToCommandWithRepository(tokens[1], repo, displayer)
 		if err != nil {
 			return nil, err
 		}
@@ -35,10 +35,10 @@ func ParserWithRepository(repo data.Repository) Parser {
 	}
 }
 
-func tokenToCommandWithRepository(token string, repo data.Repository) (Command, error) {
+func tokenToCommandWithRepository(token string, repo data.Repository, displayer Displayer) (Command, error) {
 	switch token {
 	case string(ListCommandName):
-		return &List{repo: repo}, nil
+		return &List{repo: repo, display: displayer}, nil
 	case string(CreateCommandName):
 		return &Create{repo: repo}, nil
 	case string(DeleteCommandName):
