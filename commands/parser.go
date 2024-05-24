@@ -50,7 +50,7 @@ func tokenToCommandWithRepository(token string, repo data.Repository, displayer 
 	case string(WorkCommandName):
 		return &Work{repo: repo}, nil
 	case string(GetCommandName):
-		return &Get{repo: repo}, nil
+		return &Get{repo: repo, display: displayer}, nil
 	case string(HelpCommandName):
 		return &Help{}, nil
 	default:

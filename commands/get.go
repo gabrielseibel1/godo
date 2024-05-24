@@ -10,8 +10,9 @@ import (
 const GetCommandName CommandName = "get"
 
 type Get struct {
-	id   types.ID
-	repo data.Repository
+	id      types.ID
+	repo    data.Repository
+	display Displayer
 }
 
 func (g *Get) Parameterize(args []string) error {
@@ -27,7 +28,7 @@ func (g *Get) Execute() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(a)
+	fmt.Println(g.display(a))
 	return nil
 }
 
