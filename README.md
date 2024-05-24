@@ -51,6 +51,6 @@ godo delete id1
 godo
 ```
 
-![usage](godo.gif)
+![usage](godo.mp4)
 
 Use the dashboard to monitor the todo list edits from other terminal windows, as the GIF shows below.
