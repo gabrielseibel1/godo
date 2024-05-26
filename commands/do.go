@@ -16,6 +16,9 @@ type Do struct {
 
 // String implements Command.
 func (d Do) String() string {
+	if d.id == "" {
+		return fmt.Sprintf("command %s", DoCommandName)
+	}
 	return fmt.Sprintf("command %s %s", DoCommandName, d.id)
 }
 
