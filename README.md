@@ -4,7 +4,7 @@
 
 GoDo is a ToDo application written in Go.
 
-It's command-based and doesn't (yet) have a graphical interface.
+![usage](godo.gif)
 
 ## Installation
 
@@ -51,6 +51,5 @@ godo delete id1
 godo
 ```
 
-![usage](godo.mp4)
+Use the dashboard to monitor the todo list edits from other terminal windows.
 
-Use the dashboard to monitor the todo list edits from other terminal windows, as the GIF shows below.
