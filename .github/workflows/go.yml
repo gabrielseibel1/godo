@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -21,8 +21,32 @@ jobs:
       with:
         go-version: '1.22.3'
 
-    - name: Build
-      run: go build -v ./...
+    - name: Set up static analysis
+      run: |
+        sudo apt update
+        go install honnef.co/go/tools/cmd/staticcheck@latest
+  
+    - name: Verify
+      run: make
 
-    - name: Test
-      run: go test -v ./...
+    - name: Check test coverage
+      id: coverage
+      uses: vladopajic/go-test-coverage@v2
+      continue-on-error: true
+      with:
+        profile: cover.out
+        local-prefix: github.com/org/project
+        threshold-file: 100
+        threshold-package: 100
+        threshold-total: 100
+
+    - name: Make coverage badge
+      uses: action-badges/core@0.2.2
+      if: contains(github.ref, 'master')
+      with:
+        label: Coverage
+        message: ${{ steps.coverage.outputs.badge-text }}
+        message-color: ${{ steps.coverage.outputs.badge-color }}
+        file-name: coverage.svg
+        badge-branch: badges
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
