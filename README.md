@@ -1,6 +1,7 @@
 # GoDo
 
 [![Go](https://github.com/gabrielseibel1/godo/actions/workflows/go.yml/badge.svg)](https://github.com/gabrielseibel1/godo/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gabrielseibel1/godo)](https://goreportcard.com/report/github.com/gabrielseibel1/godo)
 [![](https://tokei.rs/b1/github/gabrielseibel1/godo?category=lines)](https://github.com/gabrielseibel1/godo)
 
 GoDo is a ToDo application written in Go.
