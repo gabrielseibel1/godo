@@ -4,11 +4,13 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/gabrielseibel1/godo/commands"
 	"github.com/gabrielseibel1/godo/data"
 	"github.com/gabrielseibel1/godo/presentation"
@@ -16,16 +18,33 @@ import (
 
 func main() {
 	// prepare persistency layer
-	repo := data.FileJSONRepository()
+	path := filepath.Join(data.Dir, data.JSONFile)
+
+	repo := data.NewJSONRepository(
+		data.FileReader(path),
+		data.FileWriter(path),
+		data.JSONDecode,
+		data.JSONEncode,
+		data.Compare,
+	)
 
 	// if no extra arguments passed, show UI
 	if len(os.Args) < 2 {
-		uiList(repo)
+		showUI(repo)
 		return
 	}
 
+	// something was passed as arg, interpret as command
+	runCommand(repo, path)
+}
+
+func runCommand(repo data.Repository, path string) {
 	// parse command from arguments
-	parse := commands.NewParser(repo, presentation.DisplayItem)
+	parse := commands.NewParser(commands.Deps{
+		Repo:         repo,
+		Displayer:    presentation.DisplayItem,
+		Initializers: []commands.Initializer{data.DotGodoDirCreater(filepath.Base("")), data.FileCreater(path)},
+	})
 	command, err := parse(os.Args)
 	if err != nil {
 		panic(err)
@@ -42,7 +61,7 @@ func main() {
 	}
 }
 
-func uiList(repo data.Repository) {
+func showUI(repo data.Repository) {
 	// model and program init
 	m := presentation.NewModel(
 		"GoDo - ToDo List",

@@ -1,6 +1,6 @@
 module github.com/gabrielseibel1/godo
 
-go 1.22.1
+go 1.22.3
 
 require (
 	github.com/charmbracelet/bubbles v0.18.0

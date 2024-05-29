@@ -12,6 +12,8 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+const JSONFile = "godo.json"
+
 type Decoder func(io.Reader) (map[types.ID]types.Actionable, error)
 
 type Encoder func(map[types.ID]types.Actionable, io.Writer) error
@@ -29,8 +31,6 @@ type jsonActivity struct {
 	Done        bool          `json:"done"`
 }
 
-const FileName = "database.json"
-
 type JSON struct {
 	reader  ReadGetter
 	writer  WriterGetter
@@ -40,17 +40,19 @@ type JSON struct {
 }
 
 func NewJSONRepository(
-	rcg ReadGetter,
-	wcg WriterGetter,
-	d Decoder,
-	e Encoder,
-	c Comparer,
+	rdr ReadGetter,
+	wrt WriterGetter,
+	dec Decoder,
+	enc Encoder,
+	cmp Comparer,
 ) Repository {
-	return &JSON{reader: rcg, writer: wcg, decode: d, encode: e, compare: c}
-}
-
-func FileJSONRepository() Repository {
-	return NewJSONRepository(FileReader, FileWriter, JSONDecode, JSONEncode, Compare)
+	return &JSON{
+		reader:  rdr,
+		writer:  wrt,
+		decode:  dec,
+		encode:  enc,
+		compare: cmp,
+	}
 }
 
 func (j *JSON) Get(id types.ID) (types.Actionable, error) {
@@ -146,16 +148,16 @@ func JSONEncode(abstractMap map[types.ID]types.Actionable, w io.Writer) error {
 	return json.NewEncoder(w).Encode(concreteMap)
 }
 
-func FileReader() (io.ReadCloser, error) {
-	r, err := os.Open(FileName)
-	if err != nil {
-		return os.Create(FileName)
+func FileReader(path string) ReadGetter {
+	return func() (io.ReadCloser, error) {
+		return os.Open(path)
 	}
-	return r, nil
 }
 
-func FileWriter() (io.WriteCloser, error) {
-	return os.Create(FileName)
+func FileWriter(path string) WriterGetter {
+	return func() (io.WriteCloser, error) {
+		return os.OpenFile(path, os.O_WRONLY, os.ModePerm)
+	}
 }
 
 func Compare(a, b types.Actionable) int {

@@ -1,4 +1,4 @@
-all: verify
+all: verify build
 
 verify: vet check test
 
@@ -13,6 +13,10 @@ check:
 .PHONY: test
 test:
 	go test --count 1 --cover --coverprofile=./cover.out ./...
+
+.PHONY: build
+build:
+	go build .
 
 .PHONY: debug
 debug:
