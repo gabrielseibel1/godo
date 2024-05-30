@@ -1,1 +1,2 @@
-{"tags":{"id":"tags","description":"Add support for tags in ui and commands tag/untag","duration":0,"done":false}}
+{"item":{"id":"item","description":"testing","duration":0,"done":false,"tags":["Tag1"]},"tags":{"id":"tags","description":"Add support for tags in ui and commands tag/untag","duration":0,"done":false,"tags":["tags","Tag1"]}}
+,"Other"]}}

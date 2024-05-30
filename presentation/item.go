@@ -2,7 +2,9 @@ package presentation
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/gabrielseibel1/fungo/apply"
 	"github.com/gabrielseibel1/godo/types"
 )
 
@@ -28,9 +30,10 @@ func ItemFromActionable(actionable types.Actionable) Item {
 	}
 	return Item{
 		title: string(actionable.Identify()),
-		desc: fmt.Sprintf("%s (%s) %s",
+		desc: fmt.Sprintf("%s (%s) %s %s",
 			checkbox,
 			actionable.Worked().String(),
+			strings.Join(apply.ToSlice(actionable.Tags(), func(id types.ID) string { return fmt.Sprintf("[%s]", string(id)) }), ","),
 			actionable.Describe(),
 		),
 	}

@@ -23,11 +23,17 @@ type Doable interface {
 	Done() bool
 }
 
+type Taggable interface {
+	Tag(tag ID)
+	Tags() []ID
+}
+
 type Actionable interface {
 	Identifiable
 	Describable
 	Workable
 	Doable
+	Taggable
 }
 
 type Activity struct {
@@ -35,6 +41,7 @@ type Activity struct {
 	description string
 	duration    time.Duration
 	done        bool
+	tags        []ID
 }
 
 func NewActivity(id ID, description string) *Activity {
@@ -67,4 +74,12 @@ func (a *Activity) Undo() {
 
 func (a Activity) Done() bool {
 	return a.done
+}
+
+func (a *Activity) Tag(tag ID) {
+	a.tags = append(a.tags, tag)
+}
+
+func (a Activity) Tags() []ID {
+	return a.tags
 }

@@ -41,6 +41,8 @@ func NewParser(deps Deps) Parser {
 			cmd = &Undo{repo: deps.Repo}
 		case string(WorkCommandName):
 			cmd = &Work{repo: deps.Repo}
+		case string(TagCommandName):
+			cmd = &Tag{repo: deps.Repo}
 		case string(HelpCommandName):
 			cmd = &Help{}
 		default:
