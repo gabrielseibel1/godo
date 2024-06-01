@@ -24,8 +24,9 @@ type Doable interface {
 }
 
 type Taggable interface {
-	Tag(tag ID)
-	Tags() []ID
+	AddTag(tag ID)
+	RemoveTag(tag ID)
+	Tags() map[ID]struct{}
 }
 
 type Actionable interface {
@@ -41,11 +42,11 @@ type Activity struct {
 	description string
 	duration    time.Duration
 	done        bool
-	tags        []ID
+	tags        map[ID]struct{}
 }
 
 func NewActivity(id ID, description string) *Activity {
-	return &Activity{id: id, description: description}
+	return &Activity{id: id, description: description, tags: make(map[ID]struct{})}
 }
 
 func (a Activity) Identify() ID {
@@ -76,10 +77,18 @@ func (a Activity) Done() bool {
 	return a.done
 }
 
-func (a *Activity) Tag(tag ID) {
-	a.tags = append(a.tags, tag)
+func (a *Activity) AddTag(tag ID) {
+	a.tags[tag] = struct{}{}
 }
 
-func (a Activity) Tags() []ID {
+func (a *Activity) RemoveTag(tag ID) {
+	delete(a.tags, tag)
+}
+
+func (a Activity) Tags() map[ID]struct{} {
 	return a.tags
+}
+
+func IDToString(id ID) string {
+	return string(id)
 }

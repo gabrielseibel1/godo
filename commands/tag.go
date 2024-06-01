@@ -34,7 +34,7 @@ func (t *Tag) Execute() error {
 		if err != nil {
 			return err
 		}
-		a.Tag(t.tag)
+		a.AddTag(t.tag)
 		if err := t.repo.Put(a); err != nil {
 			return err
 		}

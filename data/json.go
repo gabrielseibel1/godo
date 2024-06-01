@@ -25,11 +25,11 @@ type WriterGetter func() (io.WriteCloser, error)
 type Comparer func(a, b types.Actionable) int
 
 type jsonActivity struct {
-	ID          string        `json:"id"`
-	Description string        `json:"description"`
-	Duration    time.Duration `json:"duration"`
-	Done        bool          `json:"done"`
-	Tags        []string      `json:"tags"`
+	ID          string              `json:"id"`
+	Description string              `json:"description"`
+	Duration    time.Duration       `json:"duration"`
+	Done        bool                `json:"done"`
+	Tags        map[string]struct{} `json:"tags"`
 }
 
 type JSON struct {
@@ -132,8 +132,8 @@ func JSONDecode(r io.Reader) (map[types.ID]types.Actionable, error) {
 		} else {
 			abstract.Undo()
 		}
-		for _, tag := range concrete.Tags {
-			abstract.Tag(types.ID(tag))
+		for tag := range concrete.Tags {
+			abstract.AddTag(types.ID(tag))
 		}
 		return abstract
 	})
@@ -147,7 +147,7 @@ func JSONEncode(abstractMap map[types.ID]types.Actionable, w io.Writer) error {
 			Description: abstract.Describe(),
 			Duration:    abstract.Worked(),
 			Done:        abstract.Done(),
-			Tags:        apply.ToSlice(abstract.Tags(), func(id types.ID) string { return string(id) }),
+			Tags:        apply.ToKeys[types.ID, string](abstract.Tags(), func(id types.ID) string { return string(id) }),
 		}
 	})
 	return json.NewEncoder(w).Encode(concreteMap)
