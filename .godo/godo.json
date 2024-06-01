@@ -1,6 +1,3 @@
-{"UI tags":{"id":"UI tags","description":"filter the items by tags in the UI, listing the tags for selection","duration":0,"done":false,"tags":{}},"list tags":{"id":"list tags","description":"command like 'godo list tag1 tag2 tag3' that lists items in tags","duration":0,"done":false,"tags":{}},"ordering":{"id":"ordering","description":"sort by custom order","duration":0,"done":false,"tags":{}},"tags":{"id":"tags","description":"command like 'godo tags' that lists the existing tags","duration":0,"done":false,"tags":{}},"untag":{"id":"untag","description":"command like tag but deletes the tag from items","duration":5400000000000,"done":true,"tags":{}}}
-gs":{}}}
-gs":{}}}
-O":{}}}}
-DO":{}}}}
-
+{"UI tags":{"id":"UI tags","description":"filter the items by tags in the UI, listing the tags for selection","duration":0,"done":false,"tags":{}},"list tags":{"id":"list tags","description":"command like 'godo list tag1 tag2 tag3' that lists items in tags","duration":1800000000000,"done":true,"tags":{}},"ordering":{"id":"ordering","description":"sort by custom order","duration":0,"done":false,"tags":{}},"tags":{"id":"tags","description":"command like 'godo tags' that lists the existing tags","duration":0,"done":false,"tags":{}},"untag":{"id":"untag","description":"command like tag but deletes the tag from items","duration":5400000000000,"done":true,"tags":{}}}
+":{}}}
+ription":"command like tag but deletes the tag from items","duration":5400000000000,"done":true,"tags":{}}}

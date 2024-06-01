@@ -29,6 +29,8 @@ func NewParser(deps Deps) Parser {
 			cmd = &Init{initializers: deps.Initializers}
 		case string(ListCommandName):
 			cmd = &List{repo: deps.Repo, display: deps.Displayer}
+		case string(SublistCommandName):
+			cmd = &Sublist{repo: deps.Repo, display: deps.Displayer}
 		case string(GetCommandName):
 			cmd = &Get{repo: deps.Repo, display: deps.Displayer}
 		case string(CreateCommandName):
