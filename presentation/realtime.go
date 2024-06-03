@@ -37,7 +37,7 @@ func (r *RealtimeSync) KeepSynched() {
 				panic(err)
 			}
 			listItems := apply.ToSlice(actionables, func(a types.Actionable) list.Item {
-				return ItemFromActionable(a)
+				return UIItem{Actionable: a}
 			})
 			r.p.Send(itemsMsg(listItems))
 		}

@@ -55,6 +55,6 @@ func (m ListModel) View() string {
 	return m.style.Render(m.list.View())
 }
 
-func (m ListModel) Items() []Item {
-	return apply.ToSlice(m.list.Items(), func(i list.Item) Item { return i.(Item) })
+func (m ListModel) Items() []UIItem {
+	return apply.ToSlice(m.list.Items(), func(i list.Item) UIItem { return i.(UIItem) })
 }

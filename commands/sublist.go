@@ -39,7 +39,7 @@ func (s *Sublist) Execute() error {
 		})
 	})
 	for _, a := range tagged {
-		fmt.Println(s.display(a))
+		s.display(a)
 	}
 	return nil
 }

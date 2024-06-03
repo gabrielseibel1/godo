@@ -7,7 +7,7 @@ import (
 	"github.com/gabrielseibel1/godo/types"
 )
 
-type Displayer func(types.Actionable) string
+type Displayer func(types.Actionable)
 
 const ListCommandName CommandName = "list"
 
@@ -28,7 +28,7 @@ func (l List) Execute() error {
 		return err
 	}
 	for _, a := range as {
-		fmt.Println(l.display(a))
+		l.display(a)
 	}
 	return nil
 }

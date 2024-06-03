@@ -28,7 +28,7 @@ func (g *Get) Execute() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(g.display(a))
+	g.display(a)
 	return nil
 }
 

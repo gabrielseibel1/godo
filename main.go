@@ -42,7 +42,7 @@ func runCommand(repo data.Repository, path string) {
 	// parse command from arguments
 	parse := commands.NewParser(commands.Deps{
 		Repo:         repo,
-		Displayer:    presentation.DisplayItem,
+		Displayer:    presentation.PrintItem,
 		Initializers: []commands.Initializer{data.DotGodoDirCreater(filepath.Base("")), data.FileCreater(path)},
 	})
 	command, err := parse(os.Args)
