@@ -10,8 +10,11 @@ import (
 
 const CatCommandName CommandName = "cat"
 
+type TagLister func(data.Repository) ([]types.ID, error)
+
 type Cat struct {
-	repo data.Repository
+	repo     data.Repository
+	listTags TagLister
 }
 
 func (c *Cat) Parameterize(args []string) error {

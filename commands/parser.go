@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gabrielseibel1/godo/data"
+	"github.com/gabrielseibel1/godo/logic"
 	"github.com/gabrielseibel1/godo/types"
 )
 
@@ -30,9 +31,9 @@ func NewParser(deps Deps) Parser {
 		case string(ListCommandName):
 			cmd = &List{repo: deps.Repo, display: deps.Displayer}
 		case string(SublistCommandName):
-			cmd = &Sublist{repo: deps.Repo, display: deps.Displayer}
+			cmd = &Sublist{repo: deps.Repo, display: deps.Displayer, filterByTags: logic.SublistWithTags}
 		case string(CatCommandName):
-			cmd = &Cat{repo: deps.Repo}
+			cmd = &Cat{repo: deps.Repo, listTags: logic.ListTags}
 		case string(GetCommandName):
 			cmd = &Get{repo: deps.Repo, display: deps.Displayer}
 		case string(CreateCommandName):

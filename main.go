@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -63,8 +64,12 @@ func runCommand(repo data.Repository, path string) {
 
 func showUI(repo data.Repository) {
 	// model and program init
+	dir, err := filepath.Abs(".")
+	if err != nil {
+		dir = ""
+	}
 	m := presentation.NewModel(
-		"GoDo - ToDo List",
+		fmt.Sprintf("GoDo (%s)", filepath.Base(dir)),
 		make([]list.Item, 0),
 		lipgloss.NewStyle().Margin(1, 2),
 	)

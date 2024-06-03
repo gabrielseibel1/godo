@@ -33,9 +33,10 @@ func (c *Create) Parameterize(args []string) error {
 	if id == "" {
 		return fmt.Errorf("no id")
 	}
-	if description == "" {
-		return fmt.Errorf("no description")
-	}
+	// possibly don´t allow empty descriptions
+	// if description == "" {
+	// 	return fmt.Errorf("no description")
+	// }
 	c.actionable = types.NewActivity(id, description)
 	return nil
 }
