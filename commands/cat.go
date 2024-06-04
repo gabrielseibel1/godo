@@ -5,12 +5,11 @@ import (
 
 	"github.com/gabrielseibel1/godo/data"
 	"github.com/gabrielseibel1/godo/types"
-	"golang.org/x/exp/maps"
 )
 
 const CatCommandName CommandName = "cat"
 
-type TagLister func(data.Repository) ([]types.ID, error)
+type TagLister func(as []types.Actionable) []types.ID
 
 type Cat struct {
 	repo     data.Repository
@@ -29,10 +28,7 @@ func (c *Cat) Execute() error {
 	if err != nil {
 		return err
 	}
-	tags := make(map[types.ID]struct{})
-	for _, a := range as {
-		maps.Copy(tags, a.Tags())
-	}
+	tags := c.listTags(as)
 	for tag := range tags {
 		fmt.Println(tag)
 	}

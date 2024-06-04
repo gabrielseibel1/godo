@@ -11,7 +11,7 @@ import (
 
 const SublistCommandName CommandName = "sublist"
 
-type FilterByTags func(tags []types.ID, repo data.Repository) ([]types.Actionable, error)
+type FilterByTags func(tags []types.ID, as []types.Actionable) []types.Actionable
 
 type Sublist struct {
 	repo         data.Repository
@@ -29,10 +29,11 @@ func (s *Sublist) Parameterize(args []string) error {
 }
 
 func (s *Sublist) Execute() error {
-	tagged, err := s.filterByTags(s.tags, s.repo)
+	as, err := s.repo.List()
 	if err != nil {
 		return err
 	}
+	tagged := s.filterByTags(s.tags, as)
 	for _, a := range tagged {
 		s.display(a)
 	}

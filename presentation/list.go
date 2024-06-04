@@ -5,21 +5,20 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/gabrielseibel1/fungo/apply"
+	"github.com/gabrielseibel1/godo/types"
 )
 
 type ListModel struct {
-	title string
 	list  list.Model
 	style lipgloss.Style
 }
 
-func NewModel(title string, items []list.Item, style lipgloss.Style) ListModel {
+func NewListModel(style lipgloss.Style) ListModel {
 	m := ListModel{
-		title: title,
-		list:  list.New(items, list.NewDefaultDelegate(), 0, 0),
+		list:  list.New(make([]list.Item, 0), list.NewDefaultDelegate(), 0, 0),
 		style: style,
 	}
-	m.list.Title = m.title
+	m.list.SetShowTitle(false)
 	return m
 }
 
@@ -32,11 +31,6 @@ func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
-	case tea.KeyMsg:
-		if msg.String() == tea.KeyCtrlC.String() {
-			return m, tea.Quit
-		}
-
 	case tea.WindowSizeMsg:
 		h, v := m.style.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
@@ -44,7 +38,7 @@ func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case itemsMsg:
-		return m, m.list.SetItems(msg)
+		return m, m.list.SetItems(apply.ToSlice(msg, func(a types.Actionable) list.Item { return UIItem{a} }))
 	}
 
 	m.list, cmd = m.list.Update(msg)

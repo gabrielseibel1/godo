@@ -4,14 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gabrielseibel1/fungo/apply"
 	"github.com/gabrielseibel1/godo/data"
 	"github.com/gabrielseibel1/godo/types"
 )
 
-type itemsMsg []list.Item
+type itemsMsg []types.Actionable
 
 type RealtimeSync struct {
 	p      *tea.Program
@@ -36,10 +34,7 @@ func (r *RealtimeSync) KeepSynched() {
 			if err != nil {
 				panic(err)
 			}
-			listItems := apply.ToSlice(actionables, func(a types.Actionable) list.Item {
-				return UIItem{Actionable: a}
-			})
-			r.p.Send(itemsMsg(listItems))
+			r.p.Send(itemsMsg(actionables))
 		}
 	}
 }

@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
@@ -68,17 +66,13 @@ func showUI(repo data.Repository) {
 	if err != nil {
 		dir = ""
 	}
-	m := presentation.NewModel(
-		fmt.Sprintf("GoDo (%s)", filepath.Base(dir)),
-		make([]list.Item, 0),
-		lipgloss.NewStyle().Margin(1, 2),
-	)
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	mt := presentation.NewTabbedListModel(dir, []string{"first", "second"}, presentation.NewListModel(lipgloss.NewStyle()))
+	p := tea.NewProgram(mt, tea.WithAltScreen())
 
 	// realtime data synchronization
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	realtime := presentation.NewRealtimeSync(p, repo, ctx, time.NewTicker(time.Second))
+	realtime := presentation.NewRealtimeSync(p, repo, ctx, time.NewTicker(time.Millisecond*15))
 	go realtime.KeepSynched()
 
 	// run until error or user exists
