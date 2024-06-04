@@ -50,6 +50,8 @@ func NewParser(deps Deps) Parser {
 			cmd = &Tag{repo: deps.Repo}
 		case string(UntagCommandName):
 			cmd = &Untag{repo: deps.Repo}
+		case string(VersionCommandName):
+			cmd = &Version{}
 		case string(HelpCommandName):
 			cmd = &Help{}
 		default:
