@@ -14,27 +14,43 @@ import (
 
 const allItems = "ALL"
 
+type doer func(types.ID) error
+
+type undoer func(types.ID) error
+
+type deleter func(types.ID) error
+
+type SelectableListModel interface {
+	tea.Model
+	Selected() types.Actionable
+}
+
 type TabbedListModel struct {
 	title     lipgloss.Style
-	listModel tea.Model
+	listModel SelectableListModel
 	tabs      []string
 	activeTab int
 	style     lipgloss.Style
+	do        doer
+	undo      undoer
+	del       deleter
 }
 
-func NewTabbedListModel(path string, tabs []string, list tea.Model) TabbedListModel {
+func NewTabbedListModel(path string, list SelectableListModel, do doer, undo undoer, del deleter) TabbedListModel {
 	return TabbedListModel{
 		title: lipgloss.NewStyle().
-			Bold(true).
+			// Bold(true).
 			// Foreground(lipgloss.Color("10")).
 			// Border(lipgloss.ThickBorder()).
 			// BorderForeground(highlightColor).
-			Padding(0, 1).
+			Padding(1, 1).
 			SetString(fmt.Sprintf("%s\n%s", banner, path)),
 		listModel: list,
-		tabs:      tabs,
 		activeTab: 0,
 		style:     lipgloss.NewStyle().Margin(2, 2),
+		do:        do,
+		undo:      undo,
+		del:       del,
 	}
 }
 
@@ -47,24 +63,44 @@ func (m TabbedListModel) Init() tea.Cmd {
 // Update is called when a message is received. Use it to inspect messages
 // and, in response, update the model and/or send a command.
 func (m TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
 		switch key := msg.String(); key {
+		case "q", tea.KeyCtrlC.String():
+			return m, tea.Quit
 		case tea.KeyTab.String():
 			m.activeTab = (m.activeTab + 1) % len(m.tabs)
 		case tea.KeyShiftTab.String():
 			m.activeTab = int(math.Abs(float64((m.activeTab - 1) % len(m.tabs))))
-		case "q", tea.KeyCtrlC.String():
-			return m, tea.Quit
+		case "y":
+			if selected := m.listModel.Selected(); selected != nil {
+				if err := m.do(selected.Identify()); err != nil {
+					panic(err)
+				}
+			}
+		case "n":
+			if selected := m.listModel.Selected(); selected != nil {
+				if err := m.undo(selected.Identify()); err != nil {
+					panic(err)
+				}
+			}
+		case "d":
+			if selected := m.listModel.Selected(); selected != nil {
+				if err := m.del(selected.Identify()); err != nil {
+					panic(err)
+				}
+			}
 		}
+		listModel, cmd := m.listModel.Update(msg)
+		m.listModel = listModel.(SelectableListModel)
+		return m, cmd
 
 	case tea.WindowSizeMsg:
 		_, v := m.style.GetFrameSize()
 		msg.Height -= v + lipgloss.Height(m.title.String())
-		m.listModel, cmd = m.listModel.Update(msg)
+		listModel, cmd := m.listModel.Update(msg)
+		m.listModel = listModel.(SelectableListModel)
 		return m, cmd
 
 	case itemsMsg:
@@ -74,11 +110,13 @@ func (m TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.tabs[m.activeTab] != allItems {
 			msg = itemsMsg(logic.SublistWithTags([]types.ID{types.ID(m.tabs[m.activeTab])}, msg))
 		}
-		m.listModel, cmd = m.listModel.Update(msg)
+		listModel, cmd := m.listModel.Update(msg)
+		m.listModel = listModel.(SelectableListModel)
 		return m, cmd
 	}
 
-	m.listModel, cmd = m.listModel.Update(msg)
+	listModel, cmd := m.listModel.Update(msg)
+	m.listModel = listModel.(SelectableListModel)
 	return m, cmd
 }
 

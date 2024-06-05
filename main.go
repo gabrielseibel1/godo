@@ -12,6 +12,7 @@ import (
 
 	"github.com/gabrielseibel1/godo/commands"
 	"github.com/gabrielseibel1/godo/data"
+	"github.com/gabrielseibel1/godo/logic"
 	"github.com/gabrielseibel1/godo/presentation"
 )
 
@@ -66,7 +67,13 @@ func showUI(repo data.Repository) {
 	if err != nil {
 		dir = ""
 	}
-	mt := presentation.NewTabbedListModel(dir, []string{"first", "second"}, presentation.NewListModel(lipgloss.NewStyle()))
+	mt := presentation.NewTabbedListModel(
+		dir,
+		presentation.NewListModel(lipgloss.NewStyle()),
+		logic.DoFrom(repo),
+		logic.UndoFrom(repo),
+		logic.DeleteFrom(repo),
+	)
 	p := tea.NewProgram(mt, tea.WithAltScreen())
 
 	// realtime data synchronization

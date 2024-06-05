@@ -59,3 +59,10 @@ func (m ListModel) View() string {
 func (m ListModel) Items() []UIItem {
 	return apply.ToSlice(m.list.Items(), func(i list.Item) UIItem { return i.(UIItem) })
 }
+
+func (m ListModel) Selected() types.Actionable {
+	if sel := m.list.SelectedItem(); sel != nil {
+		return sel.(UIItem).Actionable
+	}
+	return nil
+}
