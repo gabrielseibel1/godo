@@ -26,9 +26,9 @@ func NewTabbedListModel(path string, tabs []string, list tea.Model) TabbedListMo
 	return TabbedListModel{
 		title: lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("10")).
-			Border(lipgloss.ThickBorder()).
-			BorderForeground(highlightColor).
+			// Foreground(lipgloss.Color("10")).
+			// Border(lipgloss.ThickBorder()).
+			// BorderForeground(highlightColor).
 			Padding(0, 1).
 			SetString(fmt.Sprintf("%s\n%s", banner, path)),
 		listModel: list,

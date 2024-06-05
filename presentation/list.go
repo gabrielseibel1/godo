@@ -1,6 +1,9 @@
 package presentation
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -38,7 +41,11 @@ func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case itemsMsg:
-		return m, m.list.SetItems(apply.ToSlice(msg, func(a types.Actionable) list.Item { return UIItem{a} }))
+		slices.SortFunc(msg, func(a, b types.Actionable) int {
+			return strings.Compare(string(a.Identify()), string(b.Identify()))
+		})
+		items := apply.ToSlice(msg, func(a types.Actionable) list.Item { return UIItem{a} })
+		return m, m.list.SetItems(items)
 	}
 
 	m.list, cmd = m.list.Update(msg)

@@ -16,13 +16,17 @@ type UIItem struct {
 }
 
 func (i UIItem) Title() string {
+	return string(i.Identify())
+}
+
+func (i UIItem) Description() string {
 	return fmt.Sprintf("%s %s",
 		checkbox(i.Done(), i.Worked()),
-		lipgloss.NewStyle().Bold(true).SetString(string(i.Identify())),
+		lipgloss.NewStyle().Bold(true).SetString(i.Describe()),
 	)
 }
-func (i UIItem) Description() string { return i.Describe() }
-func (i UIItem) FilterValue() string { return string(i.Identify()) + i.Describe() }
+
+func (i UIItem) FilterValue() string { return i.Title() }
 
 type CommandItem struct {
 	types.Actionable
