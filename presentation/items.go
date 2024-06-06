@@ -16,13 +16,13 @@ type UIItem struct {
 }
 
 func (i UIItem) Title() string {
-	return string(i.Identify())
+	return string(i.Identity())
 }
 
 func (i UIItem) Description() string {
 	return fmt.Sprintf("%s %s",
 		checkbox(i.Done(), i.Worked()),
-		lipgloss.NewStyle().Bold(true).SetString(i.Describe()),
+		lipgloss.NewStyle().Bold(true).SetString(i.Actionable.Description()),
 	)
 }
 
@@ -35,9 +35,9 @@ type CommandItem struct {
 func (c CommandItem) String() string {
 	return fmt.Sprintf("%s %s -(%s)-> %s ~ %s",
 		checkbox(c.Done(), c.Worked()),
-		title(c.Identify(), c.Done(), c.Worked()),
+		title(c.Identity(), c.Done(), c.Worked()),
 		c.Worked(),
-		c.Describe(),
+		c.Description(),
 		tags(c.Tags()),
 	)
 }

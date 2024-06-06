@@ -70,9 +70,11 @@ func showUI(repo data.Repository) {
 	mt := presentation.NewTabbedListModel(
 		dir,
 		presentation.NewListModel(lipgloss.NewStyle()),
+		presentation.NewEditorModel(),
 		logic.DoFrom(repo),
 		logic.UndoFrom(repo),
 		logic.DeleteFrom(repo),
+		logic.EditFrom(repo),
 	)
 	p := tea.NewProgram(mt, tea.WithAltScreen())
 

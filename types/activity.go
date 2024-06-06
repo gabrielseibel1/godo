@@ -5,15 +5,17 @@ import "time"
 type ID string
 
 type Identifiable interface {
-	Identify() ID
+	Identify(ID)
+	Identity() ID
 }
 
 type Describable interface {
-	Describe() string
+	Describe(string)
+	Description() string
 }
 
 type Workable interface {
-	Work(duration time.Duration)
+	Work(time.Duration)
 	Worked() time.Duration
 }
 
@@ -24,8 +26,8 @@ type Doable interface {
 }
 
 type Taggable interface {
-	AddTag(tag ID)
-	RemoveTag(tag ID)
+	AddTag(ID)
+	RemoveTag(ID)
 	Tags() map[ID]struct{}
 }
 
@@ -49,11 +51,19 @@ func NewActivity(id ID, description string) *Activity {
 	return &Activity{id: id, description: description, tags: make(map[ID]struct{})}
 }
 
-func (a Activity) Identify() ID {
+func (a *Activity) Identify(id ID) {
+	a.id = id
+}
+
+func (a Activity) Identity() ID {
 	return a.id
 }
 
-func (a Activity) Describe() string {
+func (a *Activity) Describe(description string) {
+	a.description = description
+}
+
+func (a Activity) Description() string {
 	return a.description
 }
 

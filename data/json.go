@@ -83,7 +83,7 @@ func (j *JSON) Put(a types.Actionable) error {
 	if err != nil {
 		return err
 	}
-	am[a.Identify()] = a
+	am[a.Identity()] = a
 	return j.mapToFile(am)
 }
 
@@ -143,8 +143,8 @@ func JSONDecode(r io.Reader) (map[types.ID]types.Actionable, error) {
 func JSONEncode(abstractMap map[types.ID]types.Actionable, w io.Writer) error {
 	concreteMap := apply.ToValues(abstractMap, func(abstract types.Actionable) jsonActivity {
 		return jsonActivity{
-			ID:          string(abstract.Identify()),
-			Description: abstract.Describe(),
+			ID:          string(abstract.Identity()),
+			Description: abstract.Description(),
 			Duration:    abstract.Worked(),
 			Done:        abstract.Done(),
 			Tags:        apply.ToKeys[types.ID, string](abstract.Tags(), func(id types.ID) string { return string(id) }),
@@ -166,7 +166,7 @@ func FileWriter(path string) WriterGetter {
 }
 
 func Compare(a, b types.Actionable) int {
-	idA, idB := a.Identify(), b.Identify()
+	idA, idB := a.Identity(), b.Identity()
 	if idA > idB {
 		return 1
 	}
