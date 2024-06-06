@@ -5,10 +5,12 @@ import (
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type EditorModel struct {
 	textArea     textarea.Model
+	textPrompt   string
 	overrideText string
 	err          error
 }
@@ -68,11 +70,13 @@ func (m *EditorModel) View() string {
 		m.textArea.SetValue(m.overrideText)
 		m.textArea.ShowLineNumbers = false
 	}
-	return fmt.Sprintf(
-		"Item description:\n\n%s\n\n%s",
-		m.textArea.View(),
-		`("e" to start editing, Ctrl+S to save, Esc to cancel editing)`,
-	) + "\n\n"
+	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("9")).Padding(0, 1).Render(
+		fmt.Sprintf(
+			"%s\n\n%s\n\n%s",
+			lipgloss.NewStyle().Bold(true).Render(m.textPrompt),
+			m.textArea.View(),
+			`("e" to start editing, Ctrl+S to save, Esc to cancel editing)`,
+		))
 }
 
 func (m *EditorModel) Text() string {
@@ -83,8 +87,12 @@ func (m *EditorModel) Clear() {
 	m.textArea.Reset()
 }
 
-func (m *EditorModel) Set(text string) {
+func (m *EditorModel) SetText(text string) {
 	m.overrideText = text
+}
+
+func (m *EditorModel) SetPrompt(prompt string) {
+	m.textPrompt = prompt
 }
 
 func (m *EditorModel) Focus() {

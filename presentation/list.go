@@ -17,11 +17,17 @@ type ListModel struct {
 }
 
 func NewListModel(style lipgloss.Style) ListModel {
+	d := list.NewDefaultDelegate()
+	d.Styles.SelectedTitle.Foreground(lipgloss.Color("9"))
+	d.Styles.SelectedDesc.Foreground(lipgloss.Color("9"))
+	d.Styles.SelectedTitle.BorderForeground(lipgloss.Color("9"))
+	d.Styles.SelectedDesc.BorderForeground(lipgloss.Color("9"))
 	m := ListModel{
-		list:  list.New(make([]list.Item, 0), list.NewDefaultDelegate(), 0, 0),
+		list:  list.New(make([]list.Item, 0), d, 0, 0),
 		style: style,
 	}
 	m.list.SetShowTitle(false)
+	m.list.SetShowHelp(false)
 	return m
 }
 

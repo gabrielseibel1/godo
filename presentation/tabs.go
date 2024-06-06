@@ -34,7 +34,8 @@ type editableTextModel interface {
 	Focus()
 	Blur()
 	Focused() bool
-	Set(string)
+	SetText(string)
+	SetPrompt(string)
 }
 
 type TabbedListModel struct {
@@ -186,9 +187,10 @@ func (m *TabbedListModel) View() string {
 		renderedTabs = append(renderedTabs, style.Render(t))
 	}
 
-	if !m.editorModel.Focused() {
-		if selected := m.listModel.Selected(); selected != nil {
-			m.editorModel.Set(selected.Description())
+	if selected := m.listModel.Selected(); selected != nil {
+		m.editorModel.SetPrompt(string(selected.Identity()))
+		if !m.editorModel.Focused() {
+			m.editorModel.SetText(selected.Description())
 		}
 	}
 
@@ -205,7 +207,7 @@ var (
 	activeTabBorder   = lipgloss.RoundedBorder()
 	highlightColor    = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	inactiveTabStyle  = lipgloss.NewStyle().Border(inactiveTabBorder).BorderForeground(highlightColor).Padding(0, 1)
-	activeTabStyle    = inactiveTabStyle.Copy().Border(activeTabBorder)
+	activeTabStyle    = inactiveTabStyle.Copy().Border(activeTabBorder).BorderForeground(lipgloss.Color("9"))
 )
 
 const (
