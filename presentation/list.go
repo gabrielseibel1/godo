@@ -1,6 +1,7 @@
 package presentation
 
 import (
+	"errors"
 	"slices"
 	"strings"
 
@@ -66,9 +67,26 @@ func (m ListModel) Items() []UIItem {
 	return apply.ToSlice(m.list.Items(), func(i list.Item) UIItem { return i.(UIItem) })
 }
 
-func (m ListModel) Selected() types.Actionable {
+func (m ListModel) Selected() (int, types.Actionable) {
+	i := m.list.Index()
 	if sel := m.list.SelectedItem(); sel != nil {
-		return sel.(UIItem).Actionable
+		return i, sel.(UIItem).Actionable
 	}
+	return i, nil
+}
+
+func (m ListModel) Select(id types.ID) error {
+	for i := 0; i < len(m.list.Items()); i++ {
+		curr := m.list.Items()[i].(UIItem).Identity()
+		if string(curr) == string(id) {
+			m.list.Select(i)
+			return nil
+		}
+	}
+	return errors.New("not found")
+}
+
+func (m ListModel) SelectIndex(i int) error {
+	m.list.Select(i)
 	return nil
 }

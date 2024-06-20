@@ -38,6 +38,7 @@ func main() {
 	runCommand(repo, path)
 }
 
+// runCommand creates the short-lived application of a command
 func runCommand(repo data.Repository, path string) {
 	// parse command from arguments
 	parse := commands.NewParser(commands.Deps{

@@ -24,19 +24,32 @@ type editor func(types.Actionable) error
 
 type selectableListModel interface {
 	tea.Model
-	Selected() types.Actionable
+	Selected() (int, types.Actionable)
+	Select(types.ID) error
+	SelectIndex(int) error
 }
 
 type editableTextModel interface {
 	tea.Model
-	Text() string
+	Title() string
+	SetTitle(string)
+	Description() string
+	SetDescription(string)
 	Clear()
-	Focus()
+	FocusTitle()
+	FocusDescription()
 	Blur()
-	Focused() bool
-	SetText(string)
-	SetPrompt(string)
+	FocusedTitle() bool
+	FocusedDescription() bool
 }
+
+type tabbedListModelState int
+
+const (
+	tabbedListModelStateBrowsing tabbedListModelState = iota
+	tabbedListModelStateEditTitle
+	tabbedListModelStateEditDescription
+)
 
 type TabbedListModel struct {
 	title       lipgloss.Style
@@ -49,6 +62,7 @@ type TabbedListModel struct {
 	del         deleter
 	edit        editor
 	editorModel editableTextModel
+	state       tabbedListModelState
 }
 
 func NewTabbedListModel(
@@ -61,13 +75,7 @@ func NewTabbedListModel(
 	edit editor,
 ) *TabbedListModel {
 	return &TabbedListModel{
-		title: lipgloss.NewStyle().
-			// Bold(true).
-			// Foreground(lipgloss.Color("10")).
-			// Border(lipgloss.ThickBorder()).
-			// BorderForeground(highlightColor).
-			Padding(1, 1).
-			SetString(fmt.Sprintf("%s\n%s", banner, path)),
+		title:       lipgloss.NewStyle().Padding(1, 1).SetString(fmt.Sprintf("%s\n%s", banner, path)),
 		listModel:   list,
 		editorModel: editor,
 		activeTab:   0,
@@ -85,33 +93,55 @@ func (m TabbedListModel) Init() tea.Cmd {
 	return m.listModel.Init()
 }
 
-// Update is called when a message is received. Use it to inspect messages
-// and, in response, update the model and/or send a command.
-func (m *TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.editorModel.Focused() {
-
-		if msg, ok := msg.(tea.KeyMsg); ok {
-			switch msg.String() {
-			case tea.KeyCtrlS.String():
-				if selected := m.listModel.Selected(); m.editorModel.Focused() && selected != nil {
-					selected.Describe(m.editorModel.Text())
-					if err := m.edit(selected); err != nil {
-						panic(err)
-					}
-					m.editorModel.Clear()
-					m.editorModel.Blur()
-					return m, nil
+func (m *TabbedListModel) updateEditingTitle(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if msg, ok := msg.(tea.KeyMsg); ok {
+		switch msg.String() {
+		case tea.KeyCtrlS.String():
+			if _, selected := m.listModel.Selected(); selected != nil {
+				if err := m.del(selected.Identity()); err != nil {
+					panic(err)
 				}
+				selected.Identify(types.ID(m.editorModel.Title()))
+				if err := m.edit(selected); err != nil {
+					panic(err)
+				}
+				if err := m.listModel.Select(selected.Identity()); err != nil {
+					panic(err)
+				}
+				m.editorModel.Blur()
+				m.editorModel.Clear()
+				m.state = tabbedListModelStateBrowsing
 			}
 		}
-
-		editor, cmd := m.editorModel.Update(msg)
-		m.editorModel = editor.(editableTextModel)
-		return m, cmd
 	}
 
-	switch msg := msg.(type) {
+	editor, cmd := m.editorModel.Update(msg)
+	m.editorModel = editor.(editableTextModel)
+	return m, cmd
+}
 
+func (m *TabbedListModel) updateEditingDescription(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if msg, ok := msg.(tea.KeyMsg); ok {
+		switch msg.String() {
+		case tea.KeyCtrlS.String():
+			if _, selected := m.listModel.Selected(); selected != nil {
+				selected.Describe(m.editorModel.Description())
+				if err := m.edit(selected); err != nil {
+					panic(err)
+				}
+				m.editorModel.Blur()
+				m.editorModel.Clear()
+				m.state = tabbedListModelStateBrowsing
+			}
+		}
+	}
+	editor, cmd := m.editorModel.Update(msg)
+	m.editorModel = editor.(editableTextModel)
+	return m, cmd
+}
+
+func (m *TabbedListModel) updateBrowsing(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch key := msg.String(); key {
 		case "q", tea.KeyCtrlC.String():
@@ -121,36 +151,52 @@ func (m *TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyShiftTab.String():
 			m.activeTab = int(math.Abs(float64((m.activeTab - 1) % len(m.tabs))))
 		case "y":
-			if selected := m.listModel.Selected(); selected != nil {
+			if _, selected := m.listModel.Selected(); selected != nil {
 				if err := m.do(selected.Identity()); err != nil {
 					panic(err)
 				}
 			}
 		case "n":
-			if selected := m.listModel.Selected(); selected != nil {
+			if _, selected := m.listModel.Selected(); selected != nil {
 				if err := m.undo(selected.Identity()); err != nil {
 					panic(err)
 				}
 			}
 		case "d":
-			if selected := m.listModel.Selected(); selected != nil {
+			if _, selected := m.listModel.Selected(); selected != nil {
 				if err := m.del(selected.Identity()); err != nil {
 					panic(err)
 				}
+				// m.listModel.SelectIndex(max(0, i-1))
+			}
+		case "c":
+			a := types.NewActivity("New Item", "No description yet...")
+			if err := m.edit(a); err != nil {
+				panic(err)
 			}
 		case "e":
-			defer m.editorModel.Focus()
-		}
-		return m.updateSubModels(msg)
+			m.state = tabbedListModelStateEditDescription
+			defer m.editorModel.FocusDescription()
+		case "r":
+			m.state = tabbedListModelStateEditTitle
+			defer m.editorModel.FocusTitle()
 
-	case tea.WindowSizeMsg:
-		// TODO probably worth reviewing if need to resize other comps
+		}
+	}
+	return m.updateSubModels(msg)
+}
+
+// Update is called when a message is received. Use it to inspect messages
+// and, in response, update the model and/or send a command.
+func (m *TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		_, v := m.style.GetFrameSize()
 		msg.Height -= v + lipgloss.Height(m.title.String())
 		msg.Height -= lipgloss.Height(m.editorModel.View())
 		return m.updateSubModels(msg)
+	}
 
-	case itemsMsg:
+	if msg, ok := msg.(itemsMsg); ok {
 		tags := apply.ToSlice(logic.ListTags(msg), types.IDToString)
 		slices.Sort(tags)
 		m.tabs = append([]string{allItems}, tags...)
@@ -158,10 +204,20 @@ func (m *TabbedListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			msg = itemsMsg(logic.SublistWithTags([]types.ID{types.ID(m.tabs[m.activeTab])}, msg))
 		}
 		return m.updateSubModels(msg)
-
-	default:
-		return m.updateSubModels(msg)
 	}
+
+	switch m.state {
+	case tabbedListModelStateEditDescription:
+		return m.updateEditingDescription(msg)
+
+	case tabbedListModelStateEditTitle:
+		return m.updateEditingTitle(msg)
+
+	case tabbedListModelStateBrowsing:
+		return m.updateBrowsing(msg)
+	}
+
+	return m, nil
 }
 
 func (m *TabbedListModel) updateSubModels(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -187,10 +243,10 @@ func (m *TabbedListModel) View() string {
 		renderedTabs = append(renderedTabs, style.Render(t))
 	}
 
-	if selected := m.listModel.Selected(); selected != nil {
-		m.editorModel.SetPrompt(string(selected.Identity()))
-		if !m.editorModel.Focused() {
-			m.editorModel.SetText(selected.Description())
+	if !m.editorModel.FocusedTitle() && !m.editorModel.FocusedDescription() {
+		if _, selected := m.listModel.Selected(); selected != nil {
+			m.editorModel.SetTitle(string(selected.Identity()))
+			m.editorModel.SetDescription(selected.Description())
 		}
 	}
 
