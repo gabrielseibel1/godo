@@ -29,9 +29,11 @@ func NewEditorModel() *EditorModel {
 	title := textarea.New()
 	title.SetHeight(1)
 	title.ShowLineNumbers = false
+	description := textarea.New()
+	description.ShowLineNumbers = false
 	return &EditorModel{
 		title:       title,
-		description: textarea.New(),
+		description: description,
 		err:         nil,
 	}
 }
@@ -64,6 +66,7 @@ func (m *EditorModel) updateEditingTitle(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.title.Focused() {
 				m.title.Blur()
 			}
+			m.state = editorModelStateNothing
 			return m, nil
 		}
 	case errMsg:
@@ -83,6 +86,7 @@ func (m *EditorModel) updatEditingDescription(msg tea.Msg) (tea.Model, tea.Cmd) 
 			if m.description.Focused() {
 				m.description.Blur()
 			}
+			m.state = editorModelStateNothing
 			return m, nil
 		}
 	case errMsg:
@@ -97,16 +101,9 @@ func (m *EditorModel) updatEditingDescription(msg tea.Msg) (tea.Model, tea.Cmd) 
 // View renders the program's UI, which is just a string. The view is
 // rendered after every Update.
 func (m *EditorModel) View() string {
-	if m.state == editorModelStateDescription {
-		m.description.ShowLineNumbers = true
-	}
-	return lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("9")).Padding(1, 2).Render(
-		fmt.Sprintf(
-			"%s\n\n%s\n\n%s",
-			m.title.View(),
-			m.description.View(),
-			`("e" to start editing, Ctrl+S to save, Esc to cancel editing)`,
-		))
+	return lipgloss.NewStyle().Border(lipgloss.NormalBorder(), true, false, false).Padding(1, 2).Render(
+		fmt.Sprintf("\n%s\n\n%s\n\n%s", m.title.View(), m.description.View(), `("r" to rename, "e" to edit, Ctrl+S to save, Esc to cancel)`),
+	)
 }
 
 func (m *EditorModel) Description() string {

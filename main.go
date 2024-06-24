@@ -45,6 +45,7 @@ func runCommand(repo data.Repository, path string) {
 		Repo:         repo,
 		Displayer:    presentation.PrintItem,
 		Initializers: []commands.Initializer{data.DotGodoDirCreater(filepath.Base("")), data.FileCreater(path)},
+		Version:      logic.Version(),
 	})
 	command, err := parse(os.Args)
 	if err != nil {
@@ -70,6 +71,7 @@ func showUI(repo data.Repository) {
 	}
 	mt := presentation.NewTabbedListModel(
 		dir,
+		logic.Version(),
 		presentation.NewListModel(lipgloss.NewStyle()),
 		presentation.NewEditorModel(),
 		logic.DoFrom(repo),

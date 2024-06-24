@@ -10,11 +10,16 @@ import (
 
 type Parser func([]string) (Command, error)
 
-type Deps struct {
-	Repo         data.Repository
-	Displayer    Displayer
-	Initializers []Initializer
-}
+type (
+	Initializer func() error
+	Displayer   func(types.Actionable)
+	Deps        struct {
+		Repo         data.Repository
+		Displayer    Displayer
+		Initializers []Initializer
+		Version      string
+	}
+)
 
 func NewParser(deps Deps) Parser {
 	return func(tokens []string) (Command, error) {
@@ -51,7 +56,7 @@ func NewParser(deps Deps) Parser {
 		case string(UntagCommandName):
 			cmd = &Untag{repo: deps.Repo}
 		case string(VersionCommandName):
-			cmd = &Version{}
+			cmd = &Version{version: deps.Version}
 		case string(HelpCommandName):
 			cmd = &Help{}
 		default:

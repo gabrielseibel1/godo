@@ -4,9 +4,9 @@ import "fmt"
 
 const VersionCommandName CommandName = "version"
 
-const version = "v0.3.0"
-
-type Version struct{}
+type Version struct {
+	version string
+}
 
 func (v *Version) Parameterize(args []string) error {
 	if len(args) > 0 {
@@ -16,7 +16,7 @@ func (v *Version) Parameterize(args []string) error {
 }
 
 func (v *Version) Execute() error {
-	fmt.Println(version)
+	fmt.Println(v.version)
 	return nil
 }
 

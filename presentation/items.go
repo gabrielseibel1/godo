@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -11,54 +12,27 @@ import (
 	"github.com/gabrielseibel1/godo/types"
 )
 
-type UIItem struct {
-	types.Actionable
+func PrintItem(a types.Actionable) {
+	fmt.Println(CommandItem{Actionable: a}.String())
 }
-
-func (i UIItem) Title() string {
-	return string(i.Identity())
-}
-
-func (i UIItem) Description() string {
-	return fmt.Sprintf("%s %s",
-		checkbox(i.Done(), i.Worked()),
-		lipgloss.NewStyle().Bold(true).SetString(i.Actionable.Description()),
-	)
-}
-
-func (i UIItem) FilterValue() string { return i.Title() }
 
 type CommandItem struct {
 	types.Actionable
+	style lipgloss.Style
 }
 
 func (c CommandItem) String() string {
 	return fmt.Sprintf("%s %s -(%s)-> %s ~ %s",
 		checkbox(c.Done(), c.Worked()),
-		title(c.Identity(), c.Done(), c.Worked()),
+		c.title(c.Identity(), c.Done(), c.Worked()),
 		c.Worked(),
 		c.Description(),
 		tags(c.Tags()),
 	)
 }
 
-func PrintItem(a types.Actionable) {
-	fmt.Println(CommandItem{Actionable: a}.String())
-}
-
-func checkbox(done bool, worked time.Duration) string {
-	if done {
-		return "✅"
-	}
-	if worked > 0 {
-		return "📶"
-	} else {
-		return "🆕"
-	}
-}
-
-func title(id types.ID, done bool, worked time.Duration) string {
-	style := lipgloss.NewStyle().SetString(fmt.Sprintf("\"%s\"", string(id))).Bold(true)
+func (c CommandItem) title(id types.ID, done bool, worked time.Duration) string {
+	style := c.style.SetString(fmt.Sprintf("\"%s\"", string(id))).Bold(true)
 	if done {
 		return style.Foreground(lipgloss.Color("10")).String() // green
 	}
@@ -76,7 +50,33 @@ func tags(t map[types.ID]struct{}) string {
 				return fmt.Sprintf("[%s]", types.IDToString(id))
 			},
 		)
+		slices.Sort(tagsSlice)
 		return strings.Join(tagsSlice, ",")
 	}
 	return ""
 }
+
+func checkbox(done bool, worked time.Duration) string {
+	if done {
+		return "✅"
+	}
+	if worked > 0 {
+		return "📶"
+	}
+	return "🆕"
+}
+
+type UIItem struct {
+	types.Actionable
+	style lipgloss.Style
+}
+
+func (i UIItem) Title() string {
+	return i.style.Render(fmt.Sprintf("%s %s (%s)",
+		checkbox(i.Done(), i.Worked()),
+		fmt.Sprintf("\"%s\"", string(i.Identity())),
+		i.Worked(),
+	))
+}
+
+func (i UIItem) FilterValue() string { return i.Title() }

@@ -19,16 +19,15 @@ type ListModel struct {
 
 func NewListModel(style lipgloss.Style) ListModel {
 	d := list.NewDefaultDelegate()
+	d.ShowDescription = false
+	d.SetSpacing(0)
 	d.Styles.SelectedTitle.Foreground(lipgloss.Color("9"))
-	d.Styles.SelectedDesc.Foreground(lipgloss.Color("9"))
 	d.Styles.SelectedTitle.BorderForeground(lipgloss.Color("9"))
-	d.Styles.SelectedDesc.BorderForeground(lipgloss.Color("9"))
 	m := ListModel{
 		list:  list.New(make([]list.Item, 0), d, 0, 0),
 		style: style,
 	}
 	m.list.SetShowTitle(false)
-	m.list.SetShowHelp(false)
 	return m
 }
 
@@ -51,7 +50,7 @@ func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		slices.SortFunc(msg, func(a, b types.Actionable) int {
 			return strings.Compare(string(a.Identity()), string(b.Identity()))
 		})
-		items := apply.ToSlice(msg, func(a types.Actionable) list.Item { return UIItem{a} })
+		items := apply.ToSlice(msg, func(a types.Actionable) list.Item { return UIItem{Actionable: a, style: m.style} })
 		return m, m.list.SetItems(items)
 	}
 

@@ -67,6 +67,7 @@ type TabbedListModel struct {
 
 func NewTabbedListModel(
 	path string,
+	version string,
 	list selectableListModel,
 	editor editableTextModel,
 	do doer,
@@ -75,7 +76,7 @@ func NewTabbedListModel(
 	edit editor,
 ) *TabbedListModel {
 	return &TabbedListModel{
-		title:       lipgloss.NewStyle().Padding(1, 1).SetString(fmt.Sprintf("%s\n%s", banner, path)),
+		title:       lipgloss.NewStyle().Padding(1, 1).SetString(fmt.Sprintf("GoDo (%s) your todo list at...\n%s", version, path)),
 		listModel:   list,
 		editorModel: editor,
 		activeTab:   0,
@@ -109,9 +110,11 @@ func (m *TabbedListModel) updateEditingTitle(msg tea.Msg) (tea.Model, tea.Cmd) {
 					panic(err)
 				}
 				m.editorModel.Blur()
-				m.editorModel.Clear()
 				m.state = tabbedListModelStateBrowsing
 			}
+		case tea.KeyEsc.String():
+			m.editorModel.Blur()
+			m.state = tabbedListModelStateBrowsing
 		}
 	}
 
@@ -130,9 +133,11 @@ func (m *TabbedListModel) updateEditingDescription(msg tea.Msg) (tea.Model, tea.
 					panic(err)
 				}
 				m.editorModel.Blur()
-				m.editorModel.Clear()
 				m.state = tabbedListModelStateBrowsing
 			}
+		case tea.KeyEsc.String():
+			m.editorModel.Blur()
+			m.state = tabbedListModelStateBrowsing
 		}
 	}
 	editor, cmd := m.editorModel.Update(msg)
@@ -250,27 +255,17 @@ func (m *TabbedListModel) View() string {
 		}
 	}
 
+	// TODO turn tabs into paged list
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		m.title.String(),
-		lipgloss.JoinHorizontal(lipgloss.Top, lipgloss.JoinVertical(lipgloss.Left, renderedTabs...), m.listModel.View()),
+		lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...), m.listModel.View()),
 		m.editorModel.View(),
 	)
 }
 
 var (
-	inactiveTabBorder = lipgloss.HiddenBorder()
-	activeTabBorder   = lipgloss.RoundedBorder()
-	highlightColor    = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	inactiveTabStyle  = lipgloss.NewStyle().Border(inactiveTabBorder).BorderForeground(highlightColor).Padding(0, 1)
-	activeTabStyle    = inactiveTabStyle.Copy().Border(activeTabBorder).BorderForeground(lipgloss.Color("9"))
-)
-
-const (
-	banner = `
-  _____     ___     
- / ___/__  / _ \___ 
-/ (_ / _ \/ // / _ \
-\___/\___/____/\___/  your to-do list at...
-  `
+	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	inactiveTabStyle = lipgloss.NewStyle().PaddingRight(4).PaddingLeft(4)
+	activeTabStyle   = inactiveTabStyle.Copy().Underline(true)
 )

@@ -6,8 +6,6 @@ import (
 
 const InitCommandName CommandName = "init"
 
-type Initializer func() error
-
 type Init struct {
 	initializers []Initializer
 }

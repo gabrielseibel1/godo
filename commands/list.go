@@ -4,10 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gabrielseibel1/godo/data"
-	"github.com/gabrielseibel1/godo/types"
 )
-
-type Displayer func(types.Actionable)
 
 const ListCommandName CommandName = "list"
 
