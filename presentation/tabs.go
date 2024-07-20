@@ -265,7 +265,7 @@ func (m *TabbedListModel) View() string {
 }
 
 var (
-	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	// highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	inactiveTabStyle = lipgloss.NewStyle().PaddingRight(4).PaddingLeft(4)
 	activeTabStyle   = inactiveTabStyle.Copy().Underline(true)
 )
