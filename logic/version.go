@@ -1,5 +1,5 @@
 package logic
 
 func Version() string {
-	return "v0.4.0"
+	return "v0.5.0"
 }
