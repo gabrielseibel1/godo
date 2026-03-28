@@ -14,10 +14,11 @@ func newAutoListCmd() *cobra.Command {
 		Short: "Show auto-work progress",
 		Long: `Show logged auto-work entries with period details.
 
-Defaults to today. Pass a date (YYYY-MM-DD) to show all entries from that date onward.
+Defaults to today. Pass a date (YYYY-MM-DD) or "month" to show entries from a given date onward.
 
 Examples:
   godo auto-list                # today only
+  godo auto-list month          # from the 1st of the current month
   godo auto-list 2026-03-01    # from March 1st onward`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -25,11 +26,15 @@ Examples:
 			since := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 
 			if len(args) == 1 {
-				d, err := time.Parse("2006-01-02", args[0])
-				if err != nil {
-					return fmt.Errorf("invalid date %q (expected YYYY-MM-DD)", args[0])
+				if args[0] == "month" {
+					since = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+				} else {
+					d, err := time.Parse("2006-01-02", args[0])
+					if err != nil {
+						return fmt.Errorf("invalid date %q (expected YYYY-MM-DD or \"month\")", args[0])
+					}
+					since = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local)
 				}
-				since = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local)
 			}
 
 			as, err := repo.List()
@@ -95,6 +100,8 @@ Examples:
 				d := now.AddDate(0, 0, -i)
 				suggestions = append(suggestions, d.Format("2006-01-02"))
 			}
+			// Also suggest "month" keyword
+			suggestions = append(suggestions, "month")
 			// Also suggest first of current month
 			firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
 			suggestions = append(suggestions, firstOfMonth.Format("2006-01-02"))
