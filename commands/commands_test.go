@@ -574,6 +574,27 @@ func TestAutoListNoResults(t *testing.T) {
 	}
 }
 
+func TestAutoListMonth(t *testing.T) {
+	testEnv(t)
+
+	now := time.Now()
+	first := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local).Format("2006-01-02")
+	mid := time.Date(now.Year(), now.Month(), 15, 0, 0, 0, 0, time.Local).Format("2006-01-02")
+
+	if err := runCmd(t, "auto-work", "14:00-18:00", "--date", first); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCmd(t, "auto-work", "18:00-20:00", "--date", mid); err != nil {
+		t.Fatal(err)
+	}
+
+	// auto-list month should show both entries
+	err := runCmd(t, "auto-list", "month")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAutoListInvalidDate(t *testing.T) {
 	testEnv(t)
 
