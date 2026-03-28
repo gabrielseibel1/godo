@@ -4,34 +4,27 @@ import (
 	"fmt"
 
 	"github.com/gabrielseibel1/godo/data"
+	"github.com/gabrielseibel1/godo/presentation"
 	"github.com/gabrielseibel1/godo/types"
+	"github.com/spf13/cobra"
 )
 
-const GetCommandName CommandName = "get"
-
-type Get struct {
-	id      types.ID
-	repo    data.Repository
-	display Displayer
-}
-
-func (g *Get) Parameterize(args []string) error {
-	if len(args) != 1 {
-		return errArgsCount(1, len(args))
+func newGetCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "get <id>",
+		Short: "Get an activity by ID",
+		Args:  argsExact(1, "godo get <id>"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			a, err := repo.Get(types.ID(args[0]))
+			if err == data.ErrNotFound {
+				return fmt.Errorf("activity %q not found", args[0])
+			}
+			if err != nil {
+				return err
+			}
+			presentation.PrintItem(a)
+			return nil
+		},
+		ValidArgsFunction: idCompletionFunc,
 	}
-	g.id = types.ID(args[0])
-	return nil
-}
-
-func (g *Get) Execute() error {
-	a, err := g.repo.Get(g.id)
-	if err != nil {
-		return err
-	}
-	g.display(a)
-	return nil
-}
-
-func (g *Get) String() string {
-	return fmt.Sprintf("command %s %s", GetCommandName, g.id)
 }
