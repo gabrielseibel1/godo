@@ -62,10 +62,7 @@ Examples:
 // If dateStr is empty, tries to infer date from activityID (extra-hour-YYYY-MM-DD), else uses today.
 // If end < start, assumes it crosses midnight.
 func parseTimeRange(input, dateStr, activityID string) (time.Time, time.Time, error) {
-	parts := strings.SplitN(input, "-", 2)
-	// Handle HH:MM-HH:MM where HH:MM contains ':'
-	// We need to split on the '-' that separates the two times
-	// Find the '-' that's between two time strings
+	// Find the '-' that separates the two time strings (skip early positions to avoid splitting HH:MM)
 	dashIdx := -1
 	for i := 1; i < len(input)-1; i++ {
 		if input[i] == '-' && i > 2 {
@@ -76,7 +73,7 @@ func parseTimeRange(input, dateStr, activityID string) (time.Time, time.Time, er
 	if dashIdx == -1 {
 		return time.Time{}, time.Time{}, fmt.Errorf("invalid time range format: %s (expected HH:MM-HH:MM)", input)
 	}
-	parts = []string{input[:dashIdx], input[dashIdx+1:]}
+	parts := []string{input[:dashIdx], input[dashIdx+1:]}
 
 	date := resolveDate(dateStr, activityID)
 
