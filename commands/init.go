@@ -1,33 +1,28 @@
 package commands
 
 import (
-	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/gabrielseibel1/godo/data"
+	"github.com/spf13/cobra"
 )
 
-const InitCommandName CommandName = "init"
-
-type Init struct {
-	initializers []Initializer
-}
-
-func (i Init) Parameterize(args []string) error {
-	if len(args) != 0 {
-		return errArgsCount(0, len(args))
+func newInitCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: "Initialize a .godo directory and godo.json file",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			path := filepath.Join(data.Dir, data.JSONFile)
+			if err := os.MkdirAll(data.Dir, os.ModeDir|os.ModePerm); err != nil {
+				return err
+			}
+			f, err := os.Create(path)
+			if err != nil {
+				return err
+			}
+			return f.Close()
+		},
 	}
-	return nil
 }
-
-func (i Init) Execute() error {
-	for _, initialize := range i.initializers {
-		if err := initialize(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (i Init) String() string {
-	return fmt.Sprintf("command %s", InitCommandName)
-}
-
-type DirCreater func() error

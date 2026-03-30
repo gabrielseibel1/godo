@@ -1,25 +1,19 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
 
-const VersionCommandName CommandName = "version"
+	"github.com/gabrielseibel1/godo/logic"
+	"github.com/spf13/cobra"
+)
 
-type Version struct {
-	version string
-}
-
-func (v *Version) Parameterize(args []string) error {
-	if len(args) > 0 {
-		return errArgsCount(0, len(args))
+func newVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(logic.Version())
+		},
 	}
-	return nil
-}
-
-func (v *Version) Execute() error {
-	fmt.Println(v.version)
-	return nil
-}
-
-func (v *Version) String() string {
-	return fmt.Sprintf("command %s", VersionCommandName)
 }

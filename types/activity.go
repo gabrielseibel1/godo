@@ -16,7 +16,10 @@ type Describable interface {
 
 type Workable interface {
 	Work(time.Duration)
+	WorkPeriod(start, end time.Time)
+	AddPeriod(start, end time.Time)
 	Worked() time.Duration
+	Periods() []Period
 }
 
 type Doable interface {
@@ -39,12 +42,18 @@ type Actionable interface {
 	Taggable
 }
 
+type Period struct {
+	Start time.Time
+	End   time.Time
+}
+
 type Activity struct {
 	id          ID
 	description string
 	duration    time.Duration
 	done        bool
 	tags        map[ID]struct{}
+	periods     []Period
 }
 
 func NewActivity(id ID, description string) *Activity {
@@ -71,8 +80,22 @@ func (a *Activity) Work(duration time.Duration) {
 	a.duration += duration
 }
 
+func (a *Activity) WorkPeriod(start, end time.Time) {
+	p := Period{Start: start, End: end}
+	a.periods = append(a.periods, p)
+	a.duration += end.Sub(start)
+}
+
+func (a *Activity) AddPeriod(start, end time.Time) {
+	a.periods = append(a.periods, Period{Start: start, End: end})
+}
+
 func (a Activity) Worked() time.Duration {
 	return a.duration
+}
+
+func (a Activity) Periods() []Period {
+	return a.periods
 }
 
 func (a *Activity) Do() {

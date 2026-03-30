@@ -5,38 +5,26 @@ import (
 
 	"github.com/gabrielseibel1/godo/data"
 	"github.com/gabrielseibel1/godo/types"
+	"github.com/spf13/cobra"
 )
 
-const DoCommandName CommandName = "do"
-
-type Do struct {
-	id   types.ID
-	repo data.Repository
-}
-
-// String implements Command.
-func (d Do) String() string {
-	if d.id == "" {
-		return fmt.Sprintf("command %s", DoCommandName)
+func newDoCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "do <id>",
+		Short: "Mark an activity as done",
+		Args:  argsExact(1, "godo do <id>"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			id := types.ID(args[0])
+			a, err := repo.Get(id)
+			if err == data.ErrNotFound {
+				return fmt.Errorf("activity %q not found", args[0])
+			}
+			if err != nil {
+				return err
+			}
+			a.Do()
+			return repo.Put(a)
+		},
+		ValidArgsFunction: idCompletionFunc,
 	}
-	return fmt.Sprintf("command %s %s", DoCommandName, d.id)
-}
-
-// Execute implements Command.
-func (d Do) Execute() error {
-	a, err := d.repo.Get(d.id)
-	if err != nil {
-		return err
-	}
-	a.Do()
-	return d.repo.Put(a)
-}
-
-// Parameterize implements Command.
-func (d *Do) Parameterize(args []string) error {
-	if len(args) != 1 {
-		return errArgsCount(1, len(args))
-	}
-	d.id = types.ID(args[0])
-	return nil
 }

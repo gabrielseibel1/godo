@@ -24,12 +24,18 @@ type WriterGetter func() (io.WriteCloser, error)
 
 type Comparer func(a, b types.Actionable) int
 
+type jsonPeriod struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
+
 type jsonActivity struct {
 	ID          string              `json:"id"`
 	Description string              `json:"description"`
 	Duration    time.Duration       `json:"duration"`
 	Done        bool                `json:"done"`
 	Tags        map[string]struct{} `json:"tags"`
+	Periods     []jsonPeriod        `json:"periods,omitempty"`
 }
 
 type JSON struct {
@@ -126,7 +132,6 @@ func JSONDecode(r io.Reader) (map[types.ID]types.Actionable, error) {
 	err := json.NewDecoder(r).Decode(&concreteMap)
 	abstractMap := apply.ToValues(concreteMap, func(concrete jsonActivity) types.Actionable {
 		abstract := types.NewActivity(types.ID(concrete.ID), concrete.Description)
-		abstract.Work(concrete.Duration)
 		if concrete.Done {
 			abstract.Do()
 		} else {
@@ -135,6 +140,11 @@ func JSONDecode(r io.Reader) (map[types.ID]types.Actionable, error) {
 		for tag := range concrete.Tags {
 			abstract.AddTag(types.ID(tag))
 		}
+		for _, p := range concrete.Periods {
+			abstract.AddPeriod(p.Start, p.End)
+		}
+		// Restore the persisted duration (includes both legacy Work() and period-based time)
+		abstract.Work(concrete.Duration)
 		return abstract
 	})
 	return abstractMap, err
@@ -142,12 +152,17 @@ func JSONDecode(r io.Reader) (map[types.ID]types.Actionable, error) {
 
 func JSONEncode(abstractMap map[types.ID]types.Actionable, w io.Writer) error {
 	concreteMap := apply.ToValues(abstractMap, func(abstract types.Actionable) jsonActivity {
+		var periods []jsonPeriod
+		for _, p := range abstract.Periods() {
+			periods = append(periods, jsonPeriod{Start: p.Start, End: p.End})
+		}
 		return jsonActivity{
 			ID:          string(abstract.Identity()),
 			Description: abstract.Description(),
 			Duration:    abstract.Worked(),
 			Done:        abstract.Done(),
 			Tags:        apply.ToKeys[types.ID, string](abstract.Tags(), func(id types.ID) string { return string(id) }),
+			Periods:     periods,
 		}
 	})
 	return json.NewEncoder(w).Encode(concreteMap)
@@ -161,7 +176,7 @@ func FileReader(path string) ReadGetter {
 
 func FileWriter(path string) WriterGetter {
 	return func() (io.WriteCloser, error) {
-		return os.OpenFile(path, os.O_WRONLY, os.ModePerm)
+		return os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	}
 }
 
