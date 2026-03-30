@@ -18,7 +18,7 @@ func LoggerOverRepository(repo Repository) Repository {
 func (l Logger) Get(id types.ID) (types.Actionable, error) {
 	a, err := l.inner.Get(id)
 	if err != nil {
-		slog.Error("repository", "get", "error", err)
+		slog.Error("repository", "op", "get", "err", err)
 	} else {
 		slog.Info("repository", "get", "success")
 	}
@@ -29,7 +29,7 @@ func (l Logger) Get(id types.ID) (types.Actionable, error) {
 func (l Logger) List() ([]types.Actionable, error) {
 	a, err := l.inner.List()
 	if err != nil {
-		slog.Error("repository", "list", "error", err)
+		slog.Error("repository", "op", "list", "err", err)
 	} else {
 		slog.Info("repository", "list", "success")
 	}
@@ -40,7 +40,7 @@ func (l Logger) List() ([]types.Actionable, error) {
 func (l Logger) Put(a types.Actionable) error {
 	err := l.inner.Put(a)
 	if err != nil {
-		slog.Error("repository", "put", "error", err)
+		slog.Error("repository", "op", "put", "err", err)
 	} else {
 		slog.Info("repository", "put", "success")
 	}
@@ -51,7 +51,7 @@ func (l Logger) Put(a types.Actionable) error {
 func (l Logger) Remove(id types.ID) error {
 	err := l.inner.Remove(id)
 	if err != nil {
-		slog.Error("repository", "remove", "error", err)
+		slog.Error("repository", "op", "remove", "err", err)
 	} else {
 		slog.Info("repository", "remove", "success")
 	}
