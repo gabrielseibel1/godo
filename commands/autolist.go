@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gabrielseibel1/godo/types"
 	"github.com/spf13/cobra"
 )
 
@@ -59,18 +60,22 @@ Examples:
 					continue
 				}
 
-				periods := a.Periods()
+				periods := types.MergePeriods(a.Periods())
 				if len(periods) == 0 && a.Worked() == 0 {
 					continue
 				}
 
 				found = true
-				fmt.Printf("%s  %s\n", datePart, formatDuration(a.Worked()))
+				var dayDuration time.Duration
+				for _, p := range periods {
+					dayDuration += p.End.Sub(p.Start)
+				}
+				fmt.Printf("%s  %s\n", datePart, formatDuration(dayDuration))
 				for _, p := range periods {
 					dur := p.End.Sub(p.Start)
 					fmt.Printf("  %s-%s  %s\n", p.Start.Format("15:04"), p.End.Format("15:04"), formatDuration(dur))
 				}
-				totalDuration += a.Worked()
+				totalDuration += dayDuration
 			}
 
 			if !found {

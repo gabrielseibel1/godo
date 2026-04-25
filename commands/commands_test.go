@@ -532,6 +532,92 @@ func TestAutoWorkNow(t *testing.T) {
 	}
 }
 
+func TestAutoWorkMergesOverlap(t *testing.T) {
+	dir := testEnv(t)
+
+	if err := runCmd(t, "auto-work", "18:00-21:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCmd(t, "auto-work", "20:00-23:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+
+	activities := readJSON(t, dir)
+	a := activities["work-2026-03-02"]
+	if len(a.Periods) != 1 {
+		t.Fatalf("expected 1 merged period, got %d", len(a.Periods))
+	}
+	if a.Periods[0].Start.Hour() != 18 {
+		t.Errorf("expected start hour 18, got %d", a.Periods[0].Start.Hour())
+	}
+	if a.Periods[0].End.Hour() != 23 {
+		t.Errorf("expected end hour 23, got %d", a.Periods[0].End.Hour())
+	}
+	if a.Duration != 5*time.Hour {
+		t.Errorf("expected 5h duration, got %v", a.Duration)
+	}
+}
+
+func TestAutoWorkMergesAdjacent(t *testing.T) {
+	dir := testEnv(t)
+
+	if err := runCmd(t, "auto-work", "18:00-20:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCmd(t, "auto-work", "20:00-22:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+
+	activities := readJSON(t, dir)
+	a := activities["work-2026-03-02"]
+	if len(a.Periods) != 1 {
+		t.Fatalf("expected 1 merged period, got %d", len(a.Periods))
+	}
+	if a.Duration != 4*time.Hour {
+		t.Errorf("expected 4h duration, got %v", a.Duration)
+	}
+}
+
+func TestAutoWorkNoOverlapKeepsBoth(t *testing.T) {
+	dir := testEnv(t)
+
+	if err := runCmd(t, "auto-work", "14:00-16:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCmd(t, "auto-work", "18:00-20:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+
+	activities := readJSON(t, dir)
+	a := activities["work-2026-03-02"]
+	if len(a.Periods) != 2 {
+		t.Fatalf("expected 2 periods, got %d", len(a.Periods))
+	}
+	if a.Duration != 4*time.Hour {
+		t.Errorf("expected 4h duration, got %v", a.Duration)
+	}
+}
+
+func TestAutoWorkMergesFullContainment(t *testing.T) {
+	dir := testEnv(t)
+
+	if err := runCmd(t, "auto-work", "18:00-23:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCmd(t, "auto-work", "19:00-21:00", "--date", "2026-03-02"); err != nil {
+		t.Fatal(err)
+	}
+
+	activities := readJSON(t, dir)
+	a := activities["work-2026-03-02"]
+	if len(a.Periods) != 1 {
+		t.Fatalf("expected 1 period, got %d", len(a.Periods))
+	}
+	if a.Duration != 5*time.Hour {
+		t.Errorf("expected 5h duration, got %v", a.Duration)
+	}
+}
+
 func TestAutoListToday(t *testing.T) {
 	testEnv(t)
 

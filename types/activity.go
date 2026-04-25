@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type ID string
 
@@ -81,9 +84,41 @@ func (a *Activity) Work(duration time.Duration) {
 }
 
 func (a *Activity) WorkPeriod(start, end time.Time) {
-	p := Period{Start: start, End: end}
-	a.periods = append(a.periods, p)
-	a.duration += end.Sub(start)
+	oldPeriodDuration := sumPeriods(a.periods)
+	a.periods = append(a.periods, Period{Start: start, End: end})
+	a.periods = MergePeriods(a.periods)
+	newPeriodDuration := sumPeriods(a.periods)
+	a.duration += newPeriodDuration - oldPeriodDuration
+}
+
+func MergePeriods(periods []Period) []Period {
+	if len(periods) <= 1 {
+		return periods
+	}
+	sorted := make([]Period, len(periods))
+	copy(sorted, periods)
+	slices.SortFunc(sorted, func(a, b Period) int { return a.Start.Compare(b.Start) })
+
+	merged := []Period{sorted[0]}
+	for _, p := range sorted[1:] {
+		last := &merged[len(merged)-1]
+		if !p.Start.After(last.End) {
+			if p.End.After(last.End) {
+				last.End = p.End
+			}
+		} else {
+			merged = append(merged, p)
+		}
+	}
+	return merged
+}
+
+func sumPeriods(periods []Period) time.Duration {
+	var d time.Duration
+	for _, p := range periods {
+		d += p.End.Sub(p.Start)
+	}
+	return d
 }
 
 func (a *Activity) AddPeriod(start, end time.Time) {
