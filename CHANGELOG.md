@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.1
+
+### Fixed
+- **Overlapping periods** — `auto-work` and `auto-list` now correctly merge overlapping time periods instead of creating duplicates.
+
+### Changed
+- **Code cleanup** — removed unused `SplitN` assignment in `parseTimeRange`.
+
 ## v0.5.0
 
 ### Added
