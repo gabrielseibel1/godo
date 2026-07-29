@@ -35,7 +35,10 @@ Examples:
   godo auto-work 18:00-23:00 --yesterday        # yesterday's date`,
 		Args: argsExact(1, "godo auto-work <HH:MM-HH:MM>"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			date := resolveAutoWorkDate(dateStr, yesterday)
+			date, err := resolveAutoWorkDate(dateStr, yesterday)
+			if err != nil {
+				return err
+			}
 			activityID := fmt.Sprintf("work-%s", date.Format("2006-01-02"))
 
 			input := normalizeNow(args[0])
@@ -76,17 +79,19 @@ Examples:
 
 // resolveAutoWorkDate determines the date for auto-work.
 // Priority: --date > --yesterday > smart-today (before 5am = yesterday)
-func resolveAutoWorkDate(dateStr string, yesterday bool) time.Time {
+func resolveAutoWorkDate(dateStr string, yesterday bool) (time.Time, error) {
 	if dateStr != "" {
-		if d, err := time.Parse("2006-01-02", dateStr); err == nil {
-			return d
+		d, err := time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("invalid --date %q: expected YYYY-MM-DD", dateStr)
 		}
+		return d, nil
 	}
 	now := time.Now()
 	if yesterday || now.Hour() < 5 {
-		return now.AddDate(0, 0, -1)
+		return now.AddDate(0, 0, -1), nil
 	}
-	return now
+	return now, nil
 }
 
 func formatDuration(d time.Duration) string {
@@ -101,11 +106,11 @@ func formatDuration(d time.Duration) string {
 // normalizeNow replaces "HH:MM.." and "HH:MM-now" with "HH:MM-<current time>".
 func normalizeNow(input string) string {
 	now := time.Now().Format("15:04")
-	if strings.HasSuffix(input, "..") {
-		return strings.TrimSuffix(input, "..") + "-" + now
+	if s, ok := strings.CutSuffix(input, ".."); ok {
+		return s + "-" + now
 	}
-	if strings.HasSuffix(input, "-now") {
-		return strings.TrimSuffix(input, "-now") + "-" + now
+	if s, ok := strings.CutSuffix(input, "-now"); ok {
+		return s + "-" + now
 	}
 	return input
 }

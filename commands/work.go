@@ -102,7 +102,7 @@ func parseTimeRange(input, dateStr, activityID string) (time.Time, time.Time, er
 	end := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, time.Local)
 
 	// If end is before start or explicitly next day, it crosses midnight
-	if endNextDay || end.Before(start) || end.Equal(start) {
+	if endNextDay || end.Before(start) {
 		end = end.AddDate(0, 0, 1)
 	}
 
